@@ -10,6 +10,9 @@ namespace BoxcatBot.EventHandlers
         {
             var messageContent = e.Message.Content.ToLower();
 
+
+            // DON'T DO IT THIS WAY Use MainModule.cs to do commands
+            // Use this message handler to do other things based on messages.
             if (messageContent.StartsWith("ping"))
             {
                 await e.Message.RespondAsync("pong!");

@@ -1,5 +1,7 @@
-﻿using BoxcatBot.EventHandlers;
+﻿using BoxcatBot.Commands;
+using BoxcatBot.EventHandlers;
 using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using System.Threading.Tasks;
 
@@ -16,9 +18,16 @@ namespace BoxcatBot
         {
             var discord = new DiscordClient(new DiscordConfiguration
             {
-                Token = "",
+                Token = "NjU4OTA4ODYxMTc1OTU1NDY3.XgGmsg._cuElYzxa0TsT1yXoXxOaGGZK4A",
                 TokenType = TokenType.Bot,
             });
+
+            var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
+            {
+                StringPrefixes = new[] { "^" }
+            });
+
+            commands.RegisterCommands<MainModule>();
 
             discord.MessageCreated += MessageEventHandler.MessageCreatedHandler;
 
