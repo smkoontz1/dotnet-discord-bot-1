@@ -1,4 +1,6 @@
-﻿using DSharpPlus;
+﻿using BoxcatBot.EventHandlers;
+using DSharpPlus;
+using DSharpPlus.Entities;
 using System.Threading.Tasks;
 
 namespace BoxcatBot
@@ -18,19 +20,9 @@ namespace BoxcatBot
                 TokenType = TokenType.Bot,
             });
 
-            discord.MessageCreated += async (e) =>
-            {
-                var channel = e.Channel;
-                var messageContent = e.Message.Content.ToLower();
+            discord.MessageCreated += MessageEventHandler.MessageCreatedHandler;
 
-                if (messageContent.StartsWith("ping"))
-                {
-                    await e.Message.RespondAsync("pong!");
-                }
-
-            };
-
-            await discord.ConnectAsync();
+            await discord.ConnectAsync(new DiscordActivity("Use: ^boxcat", ActivityType.ListeningTo));
             await Task.Delay(-1);
         }
     }
