@@ -1,8 +1,10 @@
-﻿using BoxcatBot.Commands;
-using BoxcatBot.EventHandlers;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
+﻿using BoxcatBot.Services.ChartLyricsApi;
+using BoxcatBot.Services.Common;
+using BoxcatBot.Services.SpotifyApi;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace BoxcatBot
@@ -14,25 +16,35 @@ namespace BoxcatBot
             MainAsync().GetAwaiter().GetResult();
         }
 
-        static async Task MainAsync()
+        internal static async Task MainAsync()
         {
-            var discord = new DiscordClient(new DiscordConfiguration
-            {
-                Token = "NjU4OTA4ODYxMTc1OTU1NDY3.XgGmsg._cuElYzxa0TsT1yXoXxOaGGZK4A",
-                TokenType = TokenType.Bot,
-            });
+            IConfiguration configuration = BuildConfiguration();
 
-            var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
-            {
-                StringPrefixes = new[] { "^" }
-            });
+            var serviceCollection = new ServiceCollection()
+                .AddSingleton(configuration)
+                .AddSingleton<ChartLyricsApiService>()
+                .AddSingleton<SpotifyApiService>();
 
-            commands.RegisterCommands<MainModule>();
+            var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            discord.MessageCreated += MessageEventHandler.MessageCreatedHandler;
+            var discordClientService = new DiscordClientService(configuration);
+            
+            await discordClientService.InitializeClientAsync(serviceProvider);
+        }
 
-            await discord.ConnectAsync(new DiscordActivity("Use: ^boxcat", ActivityType.ListeningTo));
-            await Task.Delay(-1);
+        internal static IConfiguration BuildConfiguration()
+        {
+            var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile($"appsettings.{environmentName}.json")
+                .AddUserSecrets("0e6d8396-f83f-4e5c-adaf-5913728d2f58")
+                .AddEnvironmentVariables();
+
+            var configuration = builder.Build();
+
+            return configuration;
         }
     }
 }
